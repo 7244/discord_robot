@@ -79,20 +79,24 @@ impl EventHandler for Handler {
             return;
         }
 
-        let member = match msg.member {
-            Some(val) => val,
-            None => return,
-        };
+        loop {
+            let member = match msg.member {
+                Some(val) => val,
+                None => break,
+            };
 
-        let joined_at = match member.joined_at {
-            Some(val) => val,
-            None => return,
-        };
+            let joined_at = match member.joined_at {
+                Some(val) => val,
+                None => break,
+            };
 
-        let since = Utc::now().signed_duration_since(joined_at.to_utc());
+            let since = Utc::now().signed_duration_since(joined_at.to_utc());
 
-        if since.num_days() >= 7 {
-            return;
+            if since.num_days() >= 7 {
+                return;
+            }
+
+            break;
         }
 
         if (msg.content.to_lowercase().contains(" nigger ")
@@ -113,6 +117,7 @@ impl EventHandler for Handler {
                 .name
                 .to_lowercase()
                 .starts_with("legitmegalinkseller"))
+            || (msg.author.name.to_lowercase().starts_with("bestmegalink"))
             || (msg.content.to_lowercase().contains("message me")
                 && msg.content.to_lowercase().contains("price"))
             || (msg.content.to_lowercase() == "dms open")
