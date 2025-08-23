@@ -44,6 +44,17 @@ impl Handler {
             eprintln!("failed to ban user {}:{} {:?}", guild_id, user_id, err);
         }
     }
+
+    pub fn ext_warn_with_msg(&self, msg: &Message, err: &str) {
+        println!(
+            "WARNING: \"{}\" with time:{} guild_id:{} author_id:{} msg: \"{}\"",
+            err,
+            msg.timestamp.naive_utc(),
+            msg.guild_id.unwrap(),
+            msg.author.id,
+            msg.content.chars().take(128).collect::<String>()
+        );
+    }
 }
 
 #[async_trait]
@@ -80,14 +91,20 @@ impl EventHandler for Handler {
         }
 
         loop {
-            let member = match msg.member {
+            let member = match &msg.member {
                 Some(val) => val,
-                None => break,
+                None => {
+                    self.ext_warn_with_msg(&msg, "match msg.member");
+                    break;
+                }
             };
 
-            let joined_at = match member.joined_at {
+            let joined_at = match &member.joined_at {
                 Some(val) => val,
-                None => break,
+                None => {
+                    self.ext_warn_with_msg(&msg, "match member.joined_at");
+                    break;
+                }
             };
 
             let since = Utc::now().signed_duration_since(joined_at.to_utc());
